@@ -1,0 +1,25 @@
+<div class="col-auto input-group align-items-center">
+    <label class="col-form-label input-group-text">Seleccione:</label>
+
+    <InputSelect TValue="int" class="form-control form-select">
+        <option disabled value="0">-- Seleccione un libro --</option>
+    </InputSelect>
+
+    <label class="col-form-label input-group-text">Cantidad:</label>
+    <InputNumber TValue="int" class="form-control" id="quantity-input" min="1" />
+
+    <button type="button" class="btn btn-outline-success bi bi-plus">
+        Agregar
+    </button>
+</div>
+
+@if (ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-2" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+@code {
+    private string? ErrorMessage;
+}
