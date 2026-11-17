@@ -49,7 +49,7 @@
                                 @foreach (var producto in Productos)
                                 {
                                     <option value="@producto.ProductoId">
-                                        @producto.Nombre
+                                        @producto.Nombre - Stock: @producto.Stock
                                     </option>
                                 }
                             </InputSelect>
