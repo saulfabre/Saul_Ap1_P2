@@ -11,7 +11,7 @@ using Saul_Ap1_P2.Context;
 namespace Saul_Ap1_P2.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20261117130942_Initial")]
+    [Migration("20261117144056_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
