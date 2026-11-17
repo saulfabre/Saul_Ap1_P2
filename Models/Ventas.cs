@@ -1,0 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Saul_Ap1_P2.Models;
+
+public class Ventas
+{
+    [Key]
+    public int VentaId { get; set; }
+
+    public DateOnly Fecha { get; set; }
+
+    [Required(ErrorMessage = "La observación de la venta es obligatoria.")]
+    public string Observacion { get; set; } = null!;
+
+    public decimal Total { get; set; }
+}
