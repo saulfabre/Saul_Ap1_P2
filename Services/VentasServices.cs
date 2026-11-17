@@ -41,6 +41,14 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
+        foreach (var detalle in venta.Detalles)
+        {
+            var producto = await contexto.Productos
+                .SingleAsync(p => p.ProductoId == detalle.ProductoId);
+
+            producto.Stock -= detalle.Cantidad;
+        }
+
         contexto.Ventas.Add(venta);
 
         return await contexto.SaveChangesAsync() > 0;
