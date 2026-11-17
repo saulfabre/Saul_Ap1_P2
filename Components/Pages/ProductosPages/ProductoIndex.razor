@@ -1,0 +1,129 @@
+@page "/Producto/Index"
+
+@rendermode InteractiveServer
+
+@inject ProductosServices productosServices
+
+<PageTitle>Index</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center" style="height: 50px;">
+            <h5 class="mb-0">Consulta de Productos</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-4">
+
+                <div>
+                    <label class="form-label"><strong>Filtrar por</strong></label>
+
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="0" disabled selected>Elige una opción</option>
+                        <option value="Id">Id</option>
+                        <option value="Nombre">Nombre</option>
+                        <option value="Precio">Precio</option>
+                        <option value="Stock">Stock</option>
+                    </InputSelect>
+                </div>
+
+                <div>
+                    <label class="form-label"><strong>Búsqueda</strong></label>
+
+                    <div class="input-group">
+                        <input class="form-control" placeholder="Buscar..." @bind="ValorFiltro" />
+
+                        <button class="btn btn-outline-primary" @onclick="Buscar">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+        
+            </div>
+
+            <QuickGrid Items="@Productos.AsQueryable()" Class="table table-bordered mt-3 align-middle">
+                <PropertyColumn Property="@(p => p.ProductoId)" Title="Id" Sortable="true" />
+                <PropertyColumn Property="@(p => p.Nombre)" Title="Nombre" Sortable="true" />
+                <PropertyColumn Property="@(p => p.Precio)" Title="Precio" Sortable="true" />
+                <PropertyColumn Property="@(p => p.Stock)" Title="Stock" Sortable="true" />
+            </QuickGrid>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <p class="mb-0"><strong>Cantidad: </strong>@Productos.Count</p>
+            <p class="mb-0"><strong>Stock: </strong>@Productos.Sum(p => p.Stock)</p>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public List<Productos> Productos { get; set; } = new();
+
+    public string Filtro = "0";
+    public string ValorFiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var productosResult = await productosServices.GetList(p => true);
+
+        if (productosResult.IsSuccess)
+        {
+            Productos = productosResult.Value;
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "Id" && int.TryParse(ValorFiltro, out int productoId))
+            {
+                var productosResult = await productosServices.GetList(p => p.ProductoId == productoId);
+
+                if (productosResult.IsSuccess)
+                {
+                    Productos = productosResult.Value!;
+                }
+            }
+            
+            else if (Filtro == "Nombre")
+            {
+                var productosResult = await productosServices.GetList(p => p.Nombre.ToLower().Contains(ValorFiltro.ToLower()));
+
+                if (productosResult.IsSuccess)
+                {
+                    Productos = productosResult.Value!;
+                }
+            }
+            else if (Filtro == "Precio" && decimal.TryParse(ValorFiltro, out decimal precio))
+            {
+                var productosResult = await productosServices.GetList(p => p.Precio == precio);
+
+                if (productosResult.IsSuccess)
+                {
+                    Productos = productosResult.Value!;
+                }
+            }
+            else if (Filtro == "Stock" && int.TryParse(ValorFiltro, out int stock))
+            {
+                var productosResult = await productosServices.GetList(p => p.Stock == stock);
+
+                if (productosResult.IsSuccess)
+                {
+                    Productos = productosResult.Value!;
+                }
+            }
+        }
+        
+        else
+        {
+            var productosResult = await productosServices.GetList(p => true);
+
+            if (productosResult.IsSuccess)
+            {
+                Productos = productosResult.Value!;
+            }
+        }
+    }
+}

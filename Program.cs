@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Saul_Ap1_P2.Components;
 using Saul_Ap1_P2.Context;
+using Saul_Ap1_P2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,9 @@ builder.Services.AddDbContextFactory<Contexto>(o =>
         builder.Configuration.GetConnectionString("ConStr")
     )
 );
+
+builder.Services.AddScoped<ProductosServices>();
+builder.Services.AddScoped<VentasServices>();
 
 var app = builder.Build();
 
