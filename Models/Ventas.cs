@@ -13,4 +13,6 @@ public class Ventas
     public string Observacion { get; set; } = null!;
 
     public decimal Total { get; set; }
+
+    public ICollection<VentasDetalles> Detalles { get; set; } = new List<VentasDetalles>();
 }
