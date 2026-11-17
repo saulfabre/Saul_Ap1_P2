@@ -1,4 +1,3 @@
-
 @page "/Venta/Edit/{VentaId:int}"
 
 @rendermode InteractiveServer
@@ -6,6 +5,7 @@
 @inject VentasServices ventasServices
 @inject ProductosServices productosServices
 @inject ToastService toastService
+@inject NavigationManager navigationManager
 
 <PageTitle>Editar Venta</PageTitle>
 
@@ -40,11 +40,10 @@
                         <div>
                             <label class="form-label"><strong>Producto</strong></label>
 
-                            <InputSelect class="form-select" @bind-Value="ProductoId"
-                                                             @bind-Value:after="() => Precio = Productos
+                            <InputSelect class="form-select" @bind-Value="ProductoId" @bind-Value:after="() => Precio = Productos
                                                             .FirstOrDefault(p => p.ProductoId == ProductoId)!.Precio">>
 
-                                <option value="0" disabled>Seleccione un producto</option>
+<option value="0" disabled>Seleccione un producto</option>
 
                                 @foreach (var producto in Productos)
                                 {
@@ -82,8 +81,7 @@
                         <PropertyColumn Property="@(d => d.Precio)" Title="Precio" />
 
                         <TemplateColumn Title="Opciones" Context="detalle">
-                            <button type="button" class="btn btn-danger"
-                                    @onclick="() => EliminarDetalle(detalle)">
+                            <button type="button" class="btn btn-danger" @onclick="() => EliminarDetalle(detalle)">
                                 Eliminar
                             </button>
                         </TemplateColumn>
@@ -108,6 +106,11 @@
                     Guardar
                 </button>
 
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                        data-bs-target="#eliminarVentaModal">
+                    Eliminar
+                </button>
+
                 <a href="/Venta/Index" class="btn btn-outline-secondary">
                     Volver
                 </a>
@@ -115,6 +118,39 @@
         </div>
     </div>
 </EditForm>
+
+<div class="modal fade" id="eliminarVentaModal" tabindex="-1" aria-labelledby="eliminarVentaLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarVentaLabel">
+                    Confirmar eliminación
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                ¿Está seguro de que desea eliminar esta venta?
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="EliminarVenta">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+</div>
 
 @code {
     [Parameter]
@@ -208,6 +244,21 @@
         else
         {
             toastService.ShowError("No se ha podido modificar correctamente");
+        }
+    }
+
+    private async Task EliminarVenta()
+    {
+        var resultado = await ventasServices.Eliminar(VentaId);
+
+        if (resultado.IsSuccess)
+        {
+            toastService.ShowSuccess("La venta se eliminó correctamente.");
+            navigationManager.NavigateTo("/Venta/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar la venta.");
         }
     }
 }

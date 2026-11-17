@@ -7,7 +7,7 @@ public class Ventas
     [Key]
     public int VentaId { get; set; }
 
-    public DateOnly Fecha { get; set; }
+    public DateOnly Fecha { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
     [Required(ErrorMessage = "La observación de la venta es obligatoria.")]
     public string Observacion { get; set; } = null!;
