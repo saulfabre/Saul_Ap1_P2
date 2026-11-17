@@ -84,14 +84,17 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
                 .SingleAsync(p => p.ProductoId == detalle.ProductoId);
 
             if (producto.Stock < detalle.Cantidad)
-            {
                 return false;
-            }
 
             producto.Stock -= detalle.Cantidad;
 
-            detalle.VentaId = venta.VentaId;
-            contexto.VentasDetalles.Add(detalle);
+            contexto.VentasDetalles.Add(new VentasDetalles
+            {
+                VentaId = venta.VentaId,
+                ProductoId = detalle.ProductoId,
+                Cantidad = detalle.Cantidad,
+                Precio = detalle.Precio
+            });
         }
 
         existeVenta.Fecha = venta.Fecha;
@@ -142,7 +145,7 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
                 producto.Stock += item.Cantidad;
             }
         }
-        
+
         await contexto.SaveChangesAsync();
     }
 
