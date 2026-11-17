@@ -16,5 +16,5 @@ public class Productos
 
     [Required(ErrorMessage = "El stock del producto es obligatorio.")]
     [Range(1, double.MaxValue, ErrorMessage = "El stock debe ser mayor que 0.")]
-    public int Stock { get; set; }
+    public int Stock { get; set; } 
 }
