@@ -58,7 +58,45 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
-        contexto.Update(venta);
+        var existeVenta = await contexto.Ventas
+            .Include(v => v.Detalles)
+            .FirstOrDefaultAsync(v => v.VentaId == venta.VentaId);
+
+        if (existeVenta == null)
+        {
+            return false;
+        }
+
+        foreach (var detalle in existeVenta.Detalles.ToList())
+        {
+
+            var producto = await contexto.Productos
+                .SingleAsync(p => p.ProductoId == detalle.ProductoId);
+
+            producto.Stock += detalle.Cantidad;
+
+            contexto.VentasDetalles.Remove(detalle);
+        }
+
+        foreach (var detalle in venta.Detalles)
+        {
+            var producto = await contexto.Productos
+                .SingleAsync(p => p.ProductoId == detalle.ProductoId);
+
+            if (producto.Stock < detalle.Cantidad)
+            {
+                return false;
+            }
+
+            producto.Stock -= detalle.Cantidad;
+
+            detalle.VentaId = venta.VentaId;
+            contexto.VentasDetalles.Add(detalle);
+        }
+
+        existeVenta.Fecha = venta.Fecha;
+        existeVenta.Observacion = venta.Observacion;
+        existeVenta.Total = venta.Detalles.Sum(d => d.Cantidad * d.Precio);
 
         return await contexto.SaveChangesAsync() > 0;
     }
@@ -91,7 +129,7 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
-        foreach(var item in detalles)
+        foreach (var item in detalles)
         {
             var producto = await contexto.Productos.SingleAsync(p => p.ProductoId == item.ProductoId);
 
@@ -104,6 +142,8 @@ public class VentasServices(IDbContextFactory<Contexto> contextFactory
                 producto.Stock += item.Cantidad;
             }
         }
+        
+        await contexto.SaveChangesAsync();
     }
 
     public async Task<Result> Guardar(Ventas venta)
