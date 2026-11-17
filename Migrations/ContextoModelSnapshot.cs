@@ -111,20 +111,14 @@ namespace Saul_Ap1_P2.Migrations
                     b.Property<int>("ProductoId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ProductosProductoId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("VentaId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VentasVentaId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("DetalleId");
 
-                    b.HasIndex("ProductosProductoId");
+                    b.HasIndex("ProductoId");
 
-                    b.HasIndex("VentasVentaId");
+                    b.HasIndex("VentaId");
 
                     b.ToTable("VentasDetalles");
                 });
@@ -133,13 +127,13 @@ namespace Saul_Ap1_P2.Migrations
                 {
                     b.HasOne("Saul_Ap1_P2.Models.Productos", "Productos")
                         .WithMany()
-                        .HasForeignKey("ProductosProductoId")
+                        .HasForeignKey("ProductoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Saul_Ap1_P2.Models.Ventas", "Ventas")
                         .WithMany("Detalles")
-                        .HasForeignKey("VentasVentaId")
+                        .HasForeignKey("VentaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Saul_Ap1_P2.Models;
 
@@ -8,9 +9,11 @@ public class VentasDetalles
     public int DetalleId { get; set; }
 
     public int VentaId { get; set; }
+    [ForeignKey("VentaId")]
     public Ventas Ventas { get; set; } = null!;
     
     public int ProductoId { get; set; }
+    [ForeignKey("ProductoId")]
     public Productos Productos { get; set; } = null!;
 
     [Required(ErrorMessage = "La cantidad es obligatoria.")]

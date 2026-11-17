@@ -50,9 +50,7 @@ namespace Saul_Ap1_P2.Migrations
                     DetalleId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     VentaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    VentasVentaId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductoId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProductosProductoId = table.Column<int>(type: "INTEGER", nullable: false),
                     Cantidad = table.Column<int>(type: "INTEGER", nullable: false),
                     Precio = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
@@ -60,14 +58,14 @@ namespace Saul_Ap1_P2.Migrations
                 {
                     table.PrimaryKey("PK_VentasDetalles", x => x.DetalleId);
                     table.ForeignKey(
-                        name: "FK_VentasDetalles_Productos_ProductosProductoId",
-                        column: x => x.ProductosProductoId,
+                        name: "FK_VentasDetalles_Productos_ProductoId",
+                        column: x => x.ProductoId,
                         principalTable: "Productos",
                         principalColumn: "ProductoId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_VentasDetalles_Ventas_VentasVentaId",
-                        column: x => x.VentasVentaId,
+                        name: "FK_VentasDetalles_Ventas_VentaId",
+                        column: x => x.VentaId,
                         principalTable: "Ventas",
                         principalColumn: "VentaId",
                         onDelete: ReferentialAction.Cascade);
@@ -86,14 +84,14 @@ namespace Saul_Ap1_P2.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_VentasDetalles_ProductosProductoId",
+                name: "IX_VentasDetalles_ProductoId",
                 table: "VentasDetalles",
-                column: "ProductosProductoId");
+                column: "ProductoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_VentasDetalles_VentasVentaId",
+                name: "IX_VentasDetalles_VentaId",
                 table: "VentasDetalles",
-                column: "VentasVentaId");
+                column: "VentaId");
         }
 
         /// <inheritdoc />
