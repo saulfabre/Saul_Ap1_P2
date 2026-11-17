@@ -1,3 +1,4 @@
+using BlazorBootstrap;
 using Microsoft.EntityFrameworkCore;
 using Saul_Ap1_P2.Components;
 using Saul_Ap1_P2.Context;
@@ -9,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBlazorBootstrap();
+
 builder.Services.AddDbContextFactory<Contexto>(o => 
     o.UseSqlite(
         builder.Configuration.GetConnectionString("ConStr")
@@ -17,6 +20,7 @@ builder.Services.AddDbContextFactory<Contexto>(o =>
 
 builder.Services.AddScoped<ProductosServices>();
 builder.Services.AddScoped<VentasServices>();
+builder.Services.AddScoped<ToastService>();
 
 var app = builder.Build();
 

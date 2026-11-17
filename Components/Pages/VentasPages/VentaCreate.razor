@@ -1,0 +1,191 @@
+@page "/Venta/Create"
+
+@rendermode InteractiveServer
+
+@inject VentasServices ventasServices
+@inject ProductosServices productosServices
+
+@inject ToastService toastService
+
+<PageTitle>Crear Venta</PageTitle>
+
+<EditForm Model="Venta" OnValidSubmit="Guardar" FormName="CrearVenta">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header d-flex justify-content-between align-items-center" style="height: 50px;">
+                <h5 class="mb-0">Crear Venta</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Venta.Fecha" />
+                    <ValidationMessage For="@(() => Venta.Fecha)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Observación</strong></label>
+                    <InputText class="form-control" @bind-Value="Venta.Observacion" />
+                    <ValidationMessage For="@(() => Venta.Observacion)" />
+                </div>
+
+                <div class="border border-secondary p-3 mt-3" style="border-radius: 4px;">
+                    <h5>Detalles de la Venta</h5>
+
+                    <hr />
+
+                    <div class="d-flex gap-3 mt-3">
+                        <div>
+                            <label class="form-label"><strong>Producto</strong></label>
+
+                            <InputSelect class="form-select" @bind-Value="ProductoId"
+                                                             @bind-Value:after="() => Precio = Productos
+                                                            .FirstOrDefault(p => p.ProductoId == ProductoId)!.Precio">
+
+                                <option value="0" disabled>Seleccione un producto</option>
+
+                                @foreach (var producto in Productos)
+                                {
+                                    <option value="@producto.ProductoId">
+                                        @producto.Nombre
+                                    </option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div>
+                            <label class="form-label"><strong>Precio</strong></label>
+                            <InputNumber class="form-control" @bind-Value="Precio" readonly />                         
+                        </div>
+
+                        <div>
+                            <label class="form-label"><strong>Cantidad</strong></label>
+
+                            <div class="input-group">
+                                <InputNumber class="form-control" @bind-Value="Cantidad" />
+
+                                <button type="button" class="btn btn-outline-primary" @onclick="AgregarDetalle">
+                                    Agregar
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <QuickGrid Items="@Venta.Detalles.AsQueryable()" Class="table table-bordered align-middle mt-4">
+
+                        <PropertyColumn Property="@(d => d.DetalleId)" Title="DetalleId" />
+                        <PropertyColumn Property="@(d => d.VentaId)" Title="VentaId" />
+                        <PropertyColumn Property="@(d => d.ProductoId)" Title="ProductoId" />
+                        <PropertyColumn Property="@(d => d.Cantidad)" Title="Cantidad" />
+                        <PropertyColumn Property="@(d => d.Precio)" Title="Precio" />
+
+                        <TemplateColumn Title="Opciones" Context="detalle">
+                            <button type="button" class="btn btn-danger"
+                                    @onclick="() => EliminarDetalle(detalle)">
+                                Eliminar
+                            </button>
+                        </TemplateColumn>
+                    </QuickGrid>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 offset-6">
+                        <div class="mt-2">
+                            <label class="form-label"><strong>Total</strong></label>
+
+                            <label class="form-control text-end">
+                                <strong>@Venta.Total.ToString("N2")</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    Guardar
+                </button>
+
+                <a href="/Venta/Index" class="btn btn-outline-secondary">
+                    Volver
+                </a>
+            </div>
+        </div>
+
+    </div>
+</EditForm>
+
+@code {
+    public Ventas Venta { get; set; } = new();
+
+    public List<Productos> Productos { get; set; } = new();
+
+    public int ProductoId { get; set; }
+    public decimal Precio { get; set; }
+    public int Cantidad { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var productosResult = await productosServices.GetList(p => true);
+
+        if (productosResult.IsSuccess)
+        {
+            Productos = productosResult.Value!;
+        }
+    }
+
+    private void AgregarDetalle()
+    {
+        var producto = Productos
+            .FirstOrDefault(p => p.ProductoId == ProductoId);
+
+        if (producto == null)
+        {
+            toastService.ShowWarning("Debe seleccionar un producto.");
+            return;
+        }
+
+        if (Cantidad <= 0)
+        {
+            toastService.ShowWarning("La cantidad debe ser mayor que cero.");
+            return;
+        }
+
+        if (Cantidad > producto.Stock)
+        {
+            toastService.ShowWarning("No hay suficiente stock disponible.");
+            return;
+        }
+
+        Venta.Detalles.Add(new VentasDetalles
+        {
+            ProductoId = producto.ProductoId,
+            Cantidad = Cantidad,
+            Precio = producto.Precio
+        });
+
+        Venta.Total = Venta.Detalles.Sum(d => d.Cantidad * d.Precio);
+    }
+
+    private void EliminarDetalle(VentasDetalles detalle)
+    {
+        Venta.Detalles.Remove(detalle);
+
+        Venta.Total = Venta.Detalles.Sum(d => d.Cantidad * d.Precio);
+    }
+
+    private async Task Guardar()
+    {
+        var ventaResult = await ventasServices.Guardar(Venta);
+
+        if (ventaResult.IsSuccess)
+        {
+            Venta = new();
+            toastService.ShowSuccess("La venta se ha creado correctamente!");
+        }
+    }
+}
